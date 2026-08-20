@@ -1,0 +1,38 @@
+whisper:
+  backend: whisper_cpp
+  executable: bin/whisper/whisper-cli.exe
+  model: large-v3
+  language: pt
+  use_gpu: true
+  gpu_backend: vulkan
+  threads: 0
+
+diarization:
+  enabled: true
+  model: pyannote/speaker-diarization-community-1
+  local_model_path: null
+  device: cpu
+  min_speakers: 2
+  max_speakers: 5
+
+output:
+  txt: true
+  json: true
+  srt: true
+  timestamps: true
+
+processing:
+  recursive: false
+  skip_existing: true
+  keep_temp_on_error: true
+
+audio:
+  sample_rate: 16000
+  channels: 1
+
+paths:
+  output: output
+  temp: temp
+  logs: logs
+  whisper_models: models/whisper
+
