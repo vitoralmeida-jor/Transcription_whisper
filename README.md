@@ -1,5 +1,7 @@
 # Transcritor Jornalístico
 
+[English](README.en.md) | **Português (Brasil)**
+
 Ferramenta local para transcrever arquivos de áudio e vídeo com
 [whisper.cpp](https://github.com/ggml-org/whisper.cpp), acelerar a transcrição em GPU AMD por
 Vulkan, separar vozes com
@@ -452,3 +454,12 @@ início, como ausência do executável/modelo.
 `output/`, `logs/`, `.env` e `.venv/` estão no `.gitignore`; apenas arquivos `.gitkeep`
 mantêm a estrutura. Revise o JSON antes de compartilhá-lo, pois ele inclui o caminho local
 da mídia em `metadata.source_path`.
+
+## Licença e créditos
+
+Copyright 2026 Vitor Almeida.
+
+Este projeto é distribuído sob a [Apache License 2.0](LICENSE). Ela permite uso,
+modificação e distribuição, inclusive comercial, desde que os avisos de copyright,
+licença e atribuição sejam preservados e as alterações sejam identificadas. Consulte
+também o arquivo [NOTICE](NOTICE).
