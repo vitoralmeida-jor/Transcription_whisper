@@ -54,16 +54,32 @@ class WhisperCppTranscriber:
             raise TranscriptionError("; ".join(errors))
         prefix = self.temp_dir / f"{output_key}.whisper.{os.getpid()}"
         json_path = Path(f"{prefix}.json")
+        # whisper.cpp on Windows still treats file arguments as narrow strings.
+        # Keeping arguments relative avoids failures when the project directory
+        # contains characters such as "ç", while subprocess uses the Unicode
+        # working directory through the Windows API.
+        project_root = self.models_dir.parent.parent
+
+        def relative_to_project(path: Path) -> str:
+            try:
+                return str(path.resolve().relative_to(project_root.resolve()))
+            except ValueError:
+                return str(path)
+
         command = [
-            str(self.executable), "-m", str(self.model_path), "-f", str(audio),
-            "-l", self.config.language, "-ojf", "-of", str(prefix), "-np",
+            str(self.executable), "-m", relative_to_project(self.model_path),
+            "-f", relative_to_project(audio), "-l", self.config.language,
+            "-ojf", "-of", relative_to_project(prefix), "-np",
         ]
         if not self.config.use_gpu:
             command.append("-ng")
         if self.config.threads > 0:
             command.extend(["-t", str(self.config.threads)])
         self.logger.info("Executando whisper.cpp | modelo=%s | gpu=%s", self.model_path, self.config.use_gpu)
-        result = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace")
+        result = subprocess.run(
+            command, cwd=project_root, capture_output=True, text=True,
+            encoding="utf-8", errors="replace",
+        )
         if result.returncode != 0:
             raise TranscriptionError(f"whisper.cpp falhou: {(result.stderr or result.stdout).strip()}")
         if not json_path.is_file():

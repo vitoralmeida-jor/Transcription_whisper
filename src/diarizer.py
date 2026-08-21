@@ -21,6 +21,16 @@ class PyannoteDiarizer:
     def _load(self):
         if self._pipeline is not None:
             return self._pipeline
+
+        # TorchCodec needs FFmpeg's shared DLLs on Windows. Prefer the copy
+        # bundled with this project before importing pyannote/torchcodec so
+        # their DLL discovery selects it instead of a system static build.
+        shared_ffmpeg = Path(__file__).resolve().parents[1] / "bin" / "ffmpeg-shared" / "bin"
+        if os.name == "nt" and shared_ffmpeg.is_dir():
+            current_path = os.environ.get("PATH", "")
+            entries = current_path.split(os.pathsep) if current_path else []
+            if str(shared_ffmpeg).casefold() not in {entry.casefold() for entry in entries}:
+                os.environ["PATH"] = str(shared_ffmpeg) + os.pathsep + current_path
         try:
             import torch
             from dotenv import load_dotenv
@@ -72,4 +82,3 @@ def _annotation_to_turns(annotation) -> list[SpeakerTurn]:
     for turn, speaker in iterator:
         turns.append(SpeakerTurn(float(turn.start), float(turn.end), str(speaker)))
     return sorted(turns, key=lambda item: (item.start, item.end, item.speaker))
-
